@@ -54,7 +54,7 @@ public class CommandExecutor {
             System.out.println("Changed directory to " + currentDir.getAbsolutePath());
         }
         else {
-            System.out.println("Already at the root directory");
+            System.out.println("Already at the root directory.");
         }
     }
 
