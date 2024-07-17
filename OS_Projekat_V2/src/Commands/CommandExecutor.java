@@ -39,8 +39,22 @@ public class CommandExecutor {
             case "ls":
                 handleLsCommand();
                 break;
+            case "..":
+                handleBackCommand();
+                break;
             default:
                 System.out.println("Unknown command");
+        }
+    }
+
+    private void handleBackCommand() {
+        File parentDir = currentDir.getParentFile();
+        if(parentDir != null && parentDir.exists()) {
+            currentDir = parentDir;
+            System.out.println("Changed directory to " + currentDir.getAbsolutePath());
+        }
+        else {
+            System.out.println("Already at the root directory");
         }
     }
 
