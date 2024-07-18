@@ -1,81 +1,64 @@
 package Memorija;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 public class MemoryManager {
-    private List<MemoryBlock> freeBlocks;
+    private int totalMemory;
+    private List<MemoryBlock> memoryBlocks;
 
     public MemoryManager(int totalMemory) {
-        freeBlocks = new ArrayList<>();
-        freeBlocks.add(new MemoryBlock(0, totalMemory));
+        this.totalMemory = totalMemory;
+        this.memoryBlocks = new ArrayList<>();
+        this.memoryBlocks.add(new MemoryBlock(0, totalMemory)); // initially all memory is free
     }
 
-    public boolean allocateMemory(int size) {
-        for (MemoryBlock block : freeBlocks) {
-            if (block.size >= size) {
-                freeBlocks.remove(block);
-                if (block.size > size) {
-                    freeBlocks.add(new MemoryBlock(block.start + size, block.size - size));
+    public int allocateMemory(int size) {
+        for (MemoryBlock block : memoryBlocks) {
+            if (!block.isAllocated() && block.getSize() >= size) {
+                int startAddress = block.getStartAddress();
+                if (block.getSize() > size) {
+                    memoryBlocks.add(new MemoryBlock(startAddress + size, block.getSize() - size));
                 }
-                return true;
+                block.setSize(size);
+                block.setAllocated(true);
+                return startAddress;
             }
         }
-        return false;
+        return -1; // not enough memory
     }
 
-    public void freeMemory(int start, int size) {
-        freeBlocks.add(new MemoryBlock(start, size));
+    public void freeMemory(int startAddress) {
+        for (MemoryBlock block : memoryBlocks) {
+            if (block.getStartAddress() == startAddress && block.isAllocated()) {
+                block.setAllocated(false);
+                defragmentMemory();
+                return;
+            }
+        }
     }
 
-    public void defragment() {
-        // Sort the free blocks by their start address
-        Collections.sort(freeBlocks, Comparator.comparingInt(block -> block.start));
-
-        // Combine adjacent free blocks
-        List<MemoryBlock> newFreeBlocks = new ArrayList<>();
-        MemoryBlock current = freeBlocks.get(0);
-
-        for (int i = 1; i < freeBlocks.size(); i++) {
-            MemoryBlock next = freeBlocks.get(i);
-            if (current.start + current.size == next.start) {
-                // Adjacent blocks, combine them
-                current.size += next.size;
+    private void defragmentMemory() {
+        List<MemoryBlock> newBlocks = new ArrayList<>();
+        MemoryBlock previous = null;
+        for (MemoryBlock block : memoryBlocks) {
+            if (previous != null && !previous.isAllocated() && !block.isAllocated()) {
+                previous.setSize(previous.getSize() + block.getSize());
             } else {
-                // Not adjacent, add the current block to the list and move to the next
-                newFreeBlocks.add(current);
-                current = next;
+                newBlocks.add(block);
+                previous = block;
             }
         }
-        // Add the last block
-        newFreeBlocks.add(current);
-
-        // Replace the old free blocks list with the new one
-        freeBlocks = newFreeBlocks;
+        memoryBlocks = newBlocks;
     }
 
-    public void printFreeBlocks() {
-        for (MemoryBlock block : freeBlocks) {
-            System.out.println("Free block: start=" + block.start + ", size=" + block.size);
+    public int getFreeMemory() {
+        int freeMemory = 0;
+        for (MemoryBlock block : memoryBlocks) {
+            if (!block.isAllocated()) {
+                freeMemory += block.getSize();
+            }
         }
-    }
-
-    public static void main(String[] args) {
-        MemoryManager memoryManager = new MemoryManager(100);
-
-        memoryManager.allocateMemory(20);
-        memoryManager.allocateMemory(10);
-        memoryManager.freeMemory(0, 20);
-        memoryManager.freeMemory(30, 10);
-
-        System.out.println("Before defragmentation:");
-        memoryManager.printFreeBlocks();
-
-        memoryManager.defragment();
-
-        System.out.println("After defragmentation:");
-        memoryManager.printFreeBlocks();
+        return freeMemory;
     }
 }

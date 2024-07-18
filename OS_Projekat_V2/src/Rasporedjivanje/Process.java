@@ -2,28 +2,30 @@ package Rasporedjivanje;
 
 public class Process {
     private String name;
-    private int duration; // Trajanje procesa u milisekundama
+    private int startAddress;
+    private int memorySize;
+    private String content;
 
-    public Process(String name, int duration) {
+    public Process(String name, int startAddress, int memorySize, String content) {
         this.name = name;
-        this.duration = duration;
+        this.startAddress = startAddress;
+        this.memorySize = memorySize;
+        this.content = content;
     }
 
     public String getName() {
         return name;
     }
 
-    public int getDuration() {
-        return duration;
+    public int getStartAddress() {
+        return startAddress;
     }
 
-    public void run() {
-        System.out.println("Process " + name + " is starting.");
-        try {
-            Thread.sleep(duration); // Simulacija vremena izvršavanja procesa
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        System.out.println("Process " + name + " has finished.");
+    public int getMemorySize() {
+        return memorySize;
+    }
+
+    public String getContent() {
+        return content;
     }
 }

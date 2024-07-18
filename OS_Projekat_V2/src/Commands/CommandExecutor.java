@@ -1,188 +1,82 @@
 package Commands;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
+import Assembler.Assembler;
+import Disk.DiskScheduler;
+import FileSistem.FileSystem;
+import Memorija.MemoryManager;
+import Rasporedjivanje.ProcessScheduler;
 
 public class CommandExecutor {
-    private File currentDir;
+    private FileSystem fileSystem;
+    private ProcessScheduler processScheduler;
+    private MemoryManager memoryManager;
+    private DiskScheduler diskScheduler;
+    private Assembler assembler;
 
-    public CommandExecutor() {
-        this.currentDir = new File("."); // Inicijalni direktorijum je trenutni direktorijum
+    public CommandExecutor(FileSystem fileSystem, ProcessScheduler processScheduler, MemoryManager memoryManager, DiskScheduler diskScheduler, Assembler assembler) {
+        this.fileSystem = fileSystem;
+        this.processScheduler = processScheduler;
+        this.memoryManager = memoryManager;
+        this.diskScheduler = diskScheduler;
+        this.assembler = assembler;
     }
 
-    public void execute(String command) {
+    public void executeCommand(String command) {
         String[] parts = command.split(" ");
-        String cmd = parts[0];
-        List<String> args = Arrays.asList(parts).subList(1, parts.length);
-
-        switch (cmd.toLowerCase()) {
+        switch (parts[0]) {
+            case "cd":
+                if (parts.length != 2) {
+                    System.out.println("Invalid cd command.");
+                    break;
+                }
+                fileSystem.changeDirectory(parts[1]);
+                break;
             case "dir":
-                handleDirCommand();
+            case "ls":
+                fileSystem.listCurrentDirectory();
+                break;
+            case "ps":
+                processScheduler.showProcessList();
                 break;
             case "mkdir":
-                handleMkdirCommand(args);
+                if (parts.length != 2) {
+                    System.out.println("Invalid mkdir command.");
+                    break;
+                }
+                fileSystem.createDirectory(parts[1]);
                 break;
             case "run":
-                handleRunCommand(args);
+                assembler.execute(parts);
                 break;
-            case "tree":
-                handleTreeCommand(currentDir);
+            case "mem":
+                System.out.println("Used memory: " + processScheduler.getMemoryUsage() + " bytes");
+                System.out.println("Free memory: " + memoryManager.getFreeMemory() + " bytes");
                 break;
-            case "del":
-                handleDelCommand(args);
+            case "exit":
+                System.out.println("Shutting down...");
+                System.exit(0);
                 break;
-            case "cd":
-                handleCdCommand(args);
+            case "rm":
+                if (parts.length != 2) {
+                    System.out.println("Invalid rm command.");
+                    break;
+                }
+                fileSystem.delete(parts[1]);
                 break;
-            case "ls":
-                handleLsCommand();
-                break;
-            case "..":
-                handleBackCommand();
+            case "help":
+                System.out.println("Available commands:");
+                System.out.println("cd <directory> - Change directory");
+                System.out.println("dir or ls - List current directory");
+                System.out.println("ps - List processes");
+                System.out.println("mkdir <directory> - Create directory");
+                System.out.println("run <file> - Run process");
+                System.out.println("mem - Show memory usage");
+                System.out.println("exit - Shut down system");
+                System.out.println("rm <file/directory> - Remove file or directory");
                 break;
             default:
-                System.out.println("Unknown command");
-        }
-    }
-
-    private void handleBackCommand() {
-        File parentDir = currentDir.getParentFile();
-        if(parentDir != null && parentDir.exists()) {
-            currentDir = parentDir;
-            System.out.println("Changed directory to " + currentDir.getAbsolutePath());
-        }
-        else {
-            System.out.println("Already at the root directory.");
-        }
-    }
-
-    private void handleDirCommand() {
-        File[] filesList = currentDir.listFiles();
-        if (filesList != null) {
-            for (File file : filesList) {
-                if (file.isDirectory()) {
-                    System.out.println("[DIR] " + file.getName());
-                } else {
-                    System.out.println(file.getName());
-                }
-            }
-        } else {
-            System.out.println("Unable to list files in the directory.");
-        }
-    }
-
-    private void handleMkdirCommand(List<String> args) {
-        if (args.size() > 0) {
-            String dirName = args.get(0);
-            File newDir = new File(currentDir, dirName);
-            if (!newDir.exists()) {
-                if (newDir.mkdir()) {
-                    System.out.println("Directory created successfully.");
-                } else {
-                    System.out.println("Failed to create directory.");
-                }
-            } else {
-                System.out.println("Directory already exists.");
-            }
-        } else {
-            System.out.println("mkdir requires an argument");
-        }
-    }
-
-    private void handleRunCommand(List<String> args) {
-        if (args.size() > 0) {
-            String processName = args.get(0);
-            File processFile = new File(currentDir, processName);
-
-            if (!processFile.exists()) {
-                System.out.println("Failed to execute program: Cannot find file " + processName);
-                return;
-            }
-
-            try {
-                ProcessBuilder processBuilder = new ProcessBuilder(processFile.getAbsolutePath());
-                processBuilder.directory(currentDir); // Postavljanje trenutnog direktorijuma kao radnog direktorijuma
-                Process process = processBuilder.start();
-                process.waitFor();
-
-                System.out.println("Process " + processName + " has finished.");
-            } catch (IOException | InterruptedException e) {
-                System.out.println("Failed to execute program: " + e.getMessage());
-            }
-        } else {
-            System.out.println("run requires an argument");
-        }
-    }
-
-    private void handleTreeCommand(File dir) {
-        printTree(dir, 0);
-    }
-
-    private void printTree(File dir, int level) {
-        if (dir.isDirectory()) {
-            System.out.println(getIndent(level) + "+-- " + dir.getName());
-            File[] filesList = dir.listFiles();
-            if (filesList != null) {
-                for (File file : filesList) {
-                    printTree(file, level + 1);
-                }
-            }
-        } else {
-            System.out.println(getIndent(level) + "+-- " + dir.getName());
-        }
-    }
-
-    private String getIndent(int level) {
-        StringBuilder indent = new StringBuilder();
-        for (int i = 0; i < level; i++) {
-            indent.append("   ");
-        }
-        return indent.toString();
-    }
-
-    private void handleDelCommand(List<String> args) {
-        if (args.size() > 0) {
-            String fileName = args.get(0);
-            File file = new File(currentDir, fileName);
-            if (file.exists()) {
-                if (file.delete()) {
-                    System.out.println("File/directory deleted successfully.");
-                } else {
-                    System.out.println("Failed to delete file/directory.");
-                }
-            } else {
-                System.out.println("File/directory does not exist.");
-            }
-        } else {
-            System.out.println("del requires an argument");
-        }
-    }
-
-    private void handleCdCommand(List<String> args) {
-        if (args.size() > 0) {
-            String dirName = args.get(0);
-            File newDir = new File(currentDir, dirName);
-            if (newDir.exists() && newDir.isDirectory()) {
-                currentDir = newDir;
-                System.out.println("Changed directory to " + currentDir.getAbsolutePath());
-            } else {
-                System.out.println("Directory does not exist.");
-            }
-        } else {
-            System.out.println("cd requires an argument");
-        }
-    }
-
-    private void handleLsCommand() {
-        File[] filesList = currentDir.listFiles();
-        if (filesList != null) {
-            for (File file : filesList) {
-                System.out.println(file.getName());
-            }
-        } else {
-            System.out.println("Unable to list files in the directory.");
+                System.out.println("Unknown command: " + parts[0]);
+                break;
         }
     }
 }
