@@ -177,33 +177,32 @@ public class FileSystem {
     public boolean hasSufficientFreeBlocks(int requiredBlocks) {
         return freeBlocks.size() >= requiredBlocks;
     }
-    public void printDirectoryTree() {
-        printDirectoryTree(currentDir, 0);
+public void printDirectoryTree() {
+        printDirectoryTree(currentDir, "");
     }
 
-    private void printDirectoryTree(Directory directory, int level) {
-        if (level!=0){
-            System.out.print("|");
+    private void printDirectoryTree(Directory directory, String indent) {
+        System.out.println(indent + directory.getName());
+
+        List<Directory> subDirs = directory.getSubDirectories();
+        List<File> files = directory.getFiles();
+
+        for (int i = 0; i < subDirs.size(); i++) {
+            Directory subDir = subDirs.get(i);
+            if (i == subDirs.size() - 1 && files.isEmpty()) {
+                printDirectoryTree(subDir, indent + "   ");
+            } else {
+                printDirectoryTree(subDir, indent + "│   ");
+            }
         }
 
-        printIndent(level);
-        if (level!=0){
-            System.out.println(directory.getName());
-        }
-
-        for (Directory subDir : directory.getSubDirectories()) {
-            printDirectoryTree(subDir, level + 1);
-        }
-        for (File file : directory.getFiles()) {
-            System.out.print("   |");
-            printIndent(level + 1);
-            System.out.println(file.getName());
-        }
-    }
-
-    private void printIndent(int level) {
-        for (int i = 0; i < level; i++) {
-            System.out.print("----");
+        for (int i = 0; i < files.size(); i++) {
+            File file = files.get(i);
+            if (i == files.size() - 1) {
+                System.out.println(indent + "└── " + file.getName());
+            } else {
+                System.out.println(indent + "├── " + file.getName());
+            }
         }
     }
 }
