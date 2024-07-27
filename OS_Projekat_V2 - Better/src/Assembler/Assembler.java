@@ -66,7 +66,7 @@ public class Assembler {
                     if (stack.size() >= 2) {
                         int a = stack.pop();
                         int b = stack.pop();
-                        stack.push(a + b);
+                        stack.push(b + a);
                     } else {
                         System.out.println("Nedovoljno vrijednosti u stack-u");
                     }
@@ -75,7 +75,7 @@ public class Assembler {
                     if (stack.size() >= 2) {
                         int a = stack.pop();
                         int b = stack.pop();
-                        stack.push(a - b);
+                        stack.push(b - a);
                     } else {
                         System.out.println("Nedovoljno vrijednosti u stack-u");
                     }
@@ -84,7 +84,7 @@ public class Assembler {
                     if (stack.size() >= 2) {
                         int a = stack.pop();
                         int b = stack.pop();
-                        stack.push(a * b);
+                        stack.push(b * a);
                     } else {
                         System.out.println("Nedovoljno vrijednosti u stack-u");
                     }
@@ -93,7 +93,7 @@ public class Assembler {
                     if (stack.size() >= 2) {
                         int a = stack.pop();
                         int b = stack.pop();
-                        stack.push(a / b);
+                        stack.push(b / a);
                     } else {
                         System.out.println("Nedovoljno vrijednosti u stack-u");
                     }
@@ -103,7 +103,7 @@ public class Assembler {
                     break;
             }
             // Dodaj delay za svaku instrukciju da simulira vreme izvršavanja
-            Thread.sleep(1000); // 1000 ms delay za svaku instrukciju
+            Thread.sleep(500); // 500 ms delay za svaku instrukciju
         }
 
         System.out.println("Finalni stack: " + stack);
