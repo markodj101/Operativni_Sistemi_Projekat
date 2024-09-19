@@ -20,29 +20,29 @@ public class Assembler {
         this.fileSystem = fileSystem;
     }
 
-    public void execute(String[] commandParts) {
+    public String execute(String[] commandParts) {
         if (commandParts.length != 2) {
-            System.out.println("Nevazeca RUN komanda. Uslov koriscenja: run <fajl>");
-            return;
+            return "Nevazeca RUN komanda. Uslov koriscenja: run <fajl>";
         }
         String fileName = commandParts[1];
 
         // Provera ekstenzije
         if (!fileName.endsWith(".asm")) {
-            System.out.println("Fajl " + fileName + " nema .asm ekstenziju i ne može biti pokrenut.");
-            return;
+            return "Fajl " + fileName + " nema .asm ekstenziju i ne može biti pokrenut.";
         }
 
         String currentDirPath = fileSystem.getCurrentDirPath();
         String absolutePath = Paths.get(currentDirPath, fileName).toString();
-        System.out.println("Izvrsavanje fajla: " + absolutePath);
+        StringBuilder result = new StringBuilder("Izvrsavanje fajla: " + absolutePath + "\n");
 
         try {
             String content = new String(Files.readAllBytes(Paths.get(absolutePath)));
             processScheduler.addProcess(fileName, content);
         } catch (IOException e) {
-            System.out.println("Neuspjesno citanje fajla " + absolutePath);
+            return "Neuspjesno citanje fajla " + absolutePath;
         }
+
+        return result.toString();
     }
 
     public void runInstructions(String instructions) throws InterruptedException {

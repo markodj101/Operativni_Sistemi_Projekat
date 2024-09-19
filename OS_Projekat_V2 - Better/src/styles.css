@@ -1,0 +1,56 @@
+/* styles.css */
+
+/* Overall background for the root pane */
+.root {
+    -fx-background-color: #1e1e1e; /* Dark grey background */
+}
+
+/* Styling for the output area (where command output is shown) */
+.output-area {
+    -fx-font-family: monospace; /* Monospaced font for terminal look */
+    -fx-font-size: 14px;
+    -fx-text-fill: #000000; /* Light grey text color */
+    -fx-background-color: #000000; /* Black background */
+    -fx-border-color: #333333; /* Dark grey border */
+    -fx-border-width: 1px;
+    -fx-padding: 10px;
+    -fx-focus-color: transparent; /* Remove focus highlight */
+    -fx-border-radius: 5px; /* Rounded corners for a modern look */
+}
+
+/* Styling for the input field (where commands are typed) */
+.input-field {
+    -fx-font-family: monospace; /* Monospaced font for terminal look */
+    -fx-font-size: 14px;
+    -fx-text-fill: #dcdcdc; /* Light grey text color */
+    -fx-background-color: #000000; /* Black background */
+    -fx-border-color: #333333; /* Dark grey border */
+    -fx-border-width: 1px;
+    -fx-padding: 5px;
+    -fx-border-radius: 5px; /* Rounded corners for a modern look */
+}
+
+/* Styling for the execute button */
+.execute-button {
+    -fx-font-family: monospace; /* Monospaced font for terminal look */
+    -fx-font-size: 14px;
+    -fx-text-fill: #dcdcdc; /* Light grey text color */
+    -fx-background-color: #444444; /* Dark grey background */
+    -fx-border-color: #333333; /* Dark grey border */
+    -fx-border-width: 1px;
+    -fx-padding: 5px 10px;
+    -fx-border-radius: 5px; /* Rounded corners for a modern look */
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 5, 0.5, 0, 1); /* Shadow effect */
+}
+
+/* Add hover effect for the execute button */
+.execute-button:hover {
+    -fx-background-color: #555555; /* Slightly lighter grey on hover */
+    -fx-text-fill: #ffffff; /* White text color on hover */
+}
+
+/* Add focus effect for the input field */
+.input-field:focused {
+    -fx-border-color: #007acc; /* Blue border on focus */
+    -fx-border-width: 2px;
+}

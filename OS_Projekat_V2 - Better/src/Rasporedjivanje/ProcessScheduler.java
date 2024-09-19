@@ -87,95 +87,100 @@ public class ProcessScheduler {
         }
     }
 
-    public synchronized void blockProcess(String name) {
+    public synchronized String blockProcess(String name) {
         if (runningProcess != null && runningProcess.getProcessName().equals(name)) {
             runningProcess.interrupt();
             memoryManager.freeMemory(runningProcess.getStartAddress());
-            System.out.println("Proces " + name + " je sada blokiran i memorija je oslobođena.");
             runningProcess.setBlocked(true);
             blockedQueue.add(runningProcess);
             runningProcess = null;
             executeNextProcess();
+            return "Proces " + name + " je sada blokiran i memorija je oslobođena.";
         } else {
-            System.out.println("Proces " + name + " nije pronađen ili nije pokrenut.");
+            return "Proces " + name + " nije pronađen ili nije pokrenut.";
         }
     }
 
-    public synchronized void unblockProcess(String name) {
+
+    public synchronized String unblockProcess(String name) {
         for (Process process : blockedQueue) {
             if (process.getProcessName().equals(name)) {
                 blockedQueue.remove(process);
-                // Create a new instance of the process
+                // Kreiraj novu instancu procesa
                 Process newProcess = new Process(process.getProcessName(), process.getContent(), assembler, this);
                 newProcess.setBlockIndices(process.getBlockIndices());
                 processQueue.add(newProcess);
-                System.out.println("Proces " + name + " je sada odblokiran i dodat u red čekanja.");
                 executeNextProcess();
-                return;
+                return "Proces " + name + " je sada odblokiran i dodat u red čekanja.";
             }
         }
-        System.out.println("Proces " + name + " nije pronađen u redu blokiranih procesa.");
+        return "Proces " + name + " nije pronađen u redu blokiranih procesa.";
     }
 
-    public synchronized void terminateProcess(String name) {
+
+    public synchronized String terminateProcess(String name) {
         if (runningProcess != null && runningProcess.getProcessName().equals(name)) {
             runningProcess.interrupt();
             memoryManager.freeMemory(runningProcess.getStartAddress());
             fileSystem.freeBlocks(runningProcess.getBlockIndices());
-            System.out.println("Proces " + name + " je terminiran i memorija je oslobođena.");
             runningProcess = null;
             executeNextProcess();
+            return "Proces " + name + " je terminiran i memorija je oslobođena.";
         } else {
             boolean found = false;
             for (Process process : processQueue) {
                 if (process.getProcessName().equals(name)) {
                     processQueue.remove(process);
                     fileSystem.freeBlocks(process.getBlockIndices());
-                    System.out.println("Proces " + name + " je uklonjen iz reda čekanja i memorija je oslobođena.");
                     found = true;
-                    break;
+                    return "Proces " + name + " je uklonjen iz reda čekanja i memorija je oslobođena.";
                 }
             }
-            if (!found) {
-                for (Process process : blockedQueue) {
-                    if (process.getProcessName().equals(name)) {
-                        blockedQueue.remove(process);
-                        fileSystem.freeBlocks(process.getBlockIndices());
-                        System.out.println("Proces " + name + " je uklonjen iz reda blokiranih procesa i memorija je oslobođena.");
-                        break;
-                    }
-                }
-            }
-        }
-    }
-
-    public synchronized void showProcessList() {
-        if (processQueue.isEmpty() && runningProcess == null) {
-            System.out.println("Trenutno nema nijednog pokrenutog procesa.");
-        }
-        if (runningProcess != null) {
-            System.out.println("Pokrenut proces " + runningProcess.getProcessName() + ":");
-            System.out.println("Instrukcije: \n" + runningProcess.getContent());
-        }
-        System.out.println("Procesi koji cekaju u redu: ");
-        if (!processQueue.isEmpty()){
-            for (Process process : processQueue) {
-                System.out.println("Proces " + process.getProcessName());
-            }
-        }
-        else
-            System.out.println("NaN");
-
-        System.out.println("Blokirani procesi: ");
-        if (!blockedQueue.isEmpty()){
             for (Process process : blockedQueue) {
-                System.out.println("Proces " + process.getProcessName());
+                if (process.getProcessName().equals(name)) {
+                    blockedQueue.remove(process);
+                    fileSystem.freeBlocks(process.getBlockIndices());
+                    return "Proces " + name + " je uklonjen iz reda blokiranih procesa i memorija je oslobođena.";
+                }
+            }
+            return "Proces " + name + " nije pronađen.";
+        }
+    }
+
+
+    public synchronized String showProcessList() {
+        StringBuilder output = new StringBuilder();
+
+        if (processQueue.isEmpty() && runningProcess == null) {
+            output.append("Trenutno nema nijednog pokrenutog procesa.\n");
+        } else {
+            if (runningProcess != null) {
+                output.append("Pokrenut proces ").append(runningProcess.getProcessName()).append(":\n");
+                output.append("Instrukcije: \n").append(runningProcess.getContent()).append("\n");
+            }
+
+            output.append("Procesi koji čekaju u redu: \n");
+            if (!processQueue.isEmpty()) {
+                for (Process process : processQueue) {
+                    output.append("Proces ").append(process.getProcessName()).append("\n");
+                }
+            } else {
+                output.append("NaN\n");
+            }
+
+            output.append("Blokirani procesi: \n");
+            if (!blockedQueue.isEmpty()) {
+                for (Process process : blockedQueue) {
+                    output.append("Proces ").append(process.getProcessName()).append("\n");
+                }
+            } else {
+                output.append("NaN\n");
             }
         }
-        else
-            System.out.println("NaN");
 
+        return output.toString();
     }
+
 
     public synchronized int getMemoryUsage() {
         int usedMemory = 0;
@@ -185,25 +190,35 @@ public class ProcessScheduler {
         return usedMemory;
     }
 
-    public synchronized void showProcessBlocks(String processName) {
+    public synchronized String showProcessBlocks(String processName) {
+        StringBuilder result = new StringBuilder();
         if (runningProcess != null && runningProcess.getProcessName().equals(processName)) {
-            System.out.println("Blokovi za proces " + processName + ": " + runningProcess.getBlockIndices());
+            result.append("Blokovi za proces ").append(processName).append(": ").append(runningProcess.getBlockIndices());
         } else {
+            boolean found = false;
             for (Process process : processQueue) {
                 if (process.getProcessName().equals(processName)) {
-                    System.out.println("Blokovi za proces " + processName + ": " + process.getBlockIndices());
-                    return;
+                    result.append("Blokovi za proces ").append(processName).append(": ").append(process.getBlockIndices());
+                    found = true;
+                    break;
                 }
             }
-            for (Process process : blockedQueue) {
-                if (process.getProcessName().equals(processName)) {
-                    System.out.println("Blokovi za proces " + processName + ": " + process.getBlockIndices());
-                    return;
+            if (!found) {
+                for (Process process : blockedQueue) {
+                    if (process.getProcessName().equals(processName)) {
+                        result.append("Blokovi za proces ").append(processName).append(": ").append(process.getBlockIndices());
+                        found = true;
+                        break;
+                    }
                 }
             }
-            System.out.println("Proces " + processName + " nije pronađen.");
+            if (!found) {
+                result.append("Proces ").append(processName).append(" nije pronađen.");
+            }
         }
+        return result.toString();
     }
+
 
     public synchronized void processFinished() {
         if (runningProcess != null) {

@@ -21,127 +21,120 @@ public class CommandExecutor {
         this.assembler = assembler;
     }
 
-    public void executeCommand(String command) {
+    public String executeCommand(String command) {
+        StringBuilder output = new StringBuilder();
         String[] parts = command.split(" ");
+        Object result;
         switch (parts[0].toLowerCase()) {
             case "cd":
                 if (parts.length != 2) {
-                    System.out.println("Nevazeca CD komanda.");
-                    break;
+                    return "Nevazeca CD komanda.";
                 }
-                fileSystem.changeDirectory(parts[1]);
+                result = fileSystem.changeDirectory(parts[1]);
                 break;
             case "dir":
             case "ls":
-                fileSystem.listCurrentDirectory();
+                result = fileSystem.listCurrentDirectory();
                 break;
             case "ps":
-                processScheduler.showProcessList();
+                result = processScheduler.showProcessList();
                 break;
             case "..":
-                fileSystem.handleBackCommand();
+                result = fileSystem.handleBackCommand();
                 break;
             case "mkdir":
                 if (parts.length != 2) {
-                    System.out.println("Nevazeca MKDIR komanda.");
-                    break;
+                    return "Nevazeca MKDIR komanda.";
                 }
-                fileSystem.createDirectory(parts[1]);
+                result = fileSystem.createDirectory(parts[1]);
                 break;
             case "run":
-                assembler.execute(parts);
+                result = assembler.execute(parts);
                 break;
             case "mem":
-                System.out.println("Koristena memorija: " + processScheduler.getMemoryUsage() + " bytes");
-                System.out.println("Slobodna memorija: " + memoryManager.getFreeMemory() + " bytes");
-                break;
+                output.append("Koristena memorija: ").append(processScheduler.getMemoryUsage()).append(" bytes\n");
+                output.append("Slobodna memorija: ").append(memoryManager.getFreeMemory()).append(" bytes");
+                return output.toString();
             case "exit":
-                System.out.println("Gasenje...");
-                System.exit(0);
-                break;
+                return "Gasenje...";
             case "rm":
                 if (parts.length != 2) {
-                    System.out.println("Nevazeca RM komanda.");
-                    break;
+                    return "Nevazeca RM komanda.";
                 }
-                fileSystem.delete(parts[1]);
+                result = fileSystem.delete(parts[1]);
                 break;
             case "block":
                 if (parts.length != 2) {
-                    System.out.println("Nevazeca BLOCK komanda.");
-                    break;
+                    return "Nevazeca BLOCK komanda.";
                 }
-                processScheduler.blockProcess(parts[1]);
+                result = processScheduler.blockProcess(parts[1]);
                 break;
             case "unblock":
                 if (parts.length != 2) {
-                    System.out.println("Nevazeca UNBLOCK komanda.");
-                    break;
+                    return "Nevazeca UNBLOCK komanda.";
                 }
-                processScheduler.unblockProcess(parts[1]);
+                result = processScheduler.unblockProcess(parts[1]);
                 break;
             case "terminate":
                 if (parts.length != 2) {
-                    System.out.println("Nevazeca TERMINATE komanda.");
-                    break;
+                    return "Nevazeca TERMINATE komanda.";
                 }
-                processScheduler.terminateProcess(parts[1]);
+                result = processScheduler.terminateProcess(parts[1]);
                 break;
             case "diskreq":
                 if (parts.length != 2) {
-                    System.out.println("Nevazeca DISKREQ komanda.");
-                    break;
+                    return "Nevazeca DISKREQ komanda.";
                 }
                 try {
                     int position = Integer.parseInt(parts[1]);
-                    diskScheduler.addRequest(position);
+                    result = diskScheduler.addRequest(position);
                 } catch (NumberFormatException e) {
-                    System.out.println("Nevazeca pozicija: " + parts[1]);
+                    return "Nevazeca pozicija: " + parts[1];
                 }
                 break;
             case "diskexecute":
-                diskScheduler.executeRequests();
+                result = diskScheduler.executeRequests();
                 break;
             case "showblocks":
                 if (parts.length != 2) {
-                    System.out.println("Nevazeca SHOWBLOCKS komanda.");
-                    break;
+                    return "Nevazeca SHOWBLOCKS komanda.";
                 }
-                processScheduler.showProcessBlocks(parts[1]);
+                result = processScheduler.showProcessBlocks(parts[1]);
                 break;
             case "showfreeblocks":
-                fileSystem.showFreeBlocks();
+                result = fileSystem.showFreeBlocks();
                 break;
             case "tree":
-                fileSystem.printDirectoryTree();
+                result = fileSystem.printDirectoryTree();
                 break;
             case "help":
-                HelpCommands();
-                break;
+                return HelpCommands();
             default:
-                System.out.println("Nepoznata komanda: " + parts[0]);
-                break;
+                return "Nepoznata komanda: " + parts[0];
         }
+        return result != null ? result.toString() : "Komanda izvršena bez rezultata.";
     }
 
-    private void HelpCommands() {
-        System.out.println("Dostupne komande:");
-        System.out.println("CD <direktorijum> - Promjena direktorijuma");
-        System.out.println("DIR ili LS - Lista trenutnog direktorijuma");
-        System.out.println("TREE - Prikaz hijerarhijske strukture direktorijuma");
-        System.out.println("PS - Lista pokrenutih procesa");
-        System.out.println("MKDIR <direktorijum> - Kreiranje direktorijuma");
-        System.out.println("RUN <fajl> - Pokretanje procesa");
-        System.out.println("MEM - Status koristenosti memorije");
-        System.out.println("EXIT - Gasenje sistema");
-        System.out.println("RM <fajl/direktorijum> - Uklanjanje fajla/direktorijuma");
-        System.out.println("BLOCK <proces> - Blokiranje procesa");
-        System.out.println("UNBLOCK <proces> - Odblokiranje procesa");
-        System.out.println("TERMINATE <proces> - Terminacija procesa");
-        System.out.println("DISKREQ <pozicija> - Dodaj disk zahtjev na poziciju");
-        System.out.println("DISKEXECUTE - Izvrsavanje svih zahtjeva po C-SCAN tehnici");
-        System.out.println("SHOWBLOCKS <fajl> - Prikaz blokova fajla");
-        System.out.println("SHOWFREEBLOCKS - Prikaz slobodnih blokova");
-        System.out.println(".. - Povratak na prethodni direktorijum");
+    private String HelpCommands() {
+        StringBuilder help = new StringBuilder("Dostupne komande:\n");
+        help.append("CD <direktorijum> - Promjena direktorijuma\n");
+        help.append("DIR ili LS - Lista trenutnog direktorijuma\n");
+        help.append("TREE - Prikaz hijerarhijske strukture direktorijuma\n");
+        help.append("PS - Lista pokrenutih procesa\n");
+        help.append("MKDIR <direktorijum> - Kreiranje direktorijuma\n");
+        help.append("RUN <fajl> - Pokretanje procesa\n");
+        help.append("MEM - Status koristenosti memorije\n");
+        help.append("EXIT - Gasenje sistema\n");
+        help.append("RM <fajl/direktorijum> - Uklanjanje fajla/direktorijuma\n");
+        help.append("BLOCK <proces> - Blokiranje procesa\n");
+        help.append("UNBLOCK <proces> - Odblokiranje procesa\n");
+        help.append("TERMINATE <proces> - Terminacija procesa\n");
+        help.append("DISKREQ <pozicija> - Dodaj disk zahtjev na poziciju\n");
+        help.append("DISKEXECUTE - Izvrsavanje svih zahtjeva po C-SCAN tehnici\n");
+        help.append("SHOWBLOCKS <fajl> - Prikaz blokova fajla\n");
+        help.append("SHOWFREEBLOCKS - Prikaz slobodnih blokova\n");
+        help.append(".. - Povratak na prethodni direktorijum");
+        return help.toString();
+
     }
 }

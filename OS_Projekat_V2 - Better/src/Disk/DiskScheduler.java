@@ -16,22 +16,24 @@ public class DiskScheduler {
         this.requestQueue = new LinkedList<>();
     }
 
-    public void addRequest(int position) {
+    public String addRequest(int position) {
         if (position >= 0 && position < diskSize) {
             requestQueue.add(position);
-            System.out.println("Dodan disk zahtjev na poziciji: " + position);
+            return "Dodan disk zahtjev na poziciji: " + position;
         } else {
-            System.out.println("Nevazeca disk pozicija " + position);
+            return "Nevazeca disk pozicija " + position;
         }
     }
 
-    public void executeRequests() {
+
+    public String executeRequests() {
         if (requestQueue.isEmpty()) {
-            System.out.println("Nema disk zahtjeva za izvrsavanje");
-            return;
+            return "Nema disk zahtjeva za izvrsavanje";
         }
 
-        System.out.println("Izvrsavanje zahtjeva diska koristeci C-SCAN tehniku...");
+        StringBuilder result = new StringBuilder();
+        result.append("Izvrsavanje zahtjeva diska koristeci C-SCAN tehniku...\n");
+
         List<Integer> requests = new LinkedList<>(requestQueue);
         Collections.sort(requests);
 
@@ -48,21 +50,23 @@ public class DiskScheduler {
 
         // Process requests to the right of the current position
         for (int request : right) {
-            System.out.println("Usluzivanje zahtjeva na poziciji " + request);
+            result.append("Usluzivanje zahtjeva na poziciji ").append(request).append("\n");
             currentPosition = request;
         }
 
         // Wrap around to the beginning of the disk
         if (!left.isEmpty()) {
-            System.out.println("Prelazak na drugi kraj diska...");
+            result.append("Prelazak na drugi kraj diska...\n");
             currentPosition = 0;
             for (int request : left) {
-                System.out.println("Usluzivanje zahtjeva na poziciji " + request);
+                result.append("Usluzivanje zahtjeva na poziciji ").append(request).append("\n");
                 currentPosition = request;
             }
         }
 
         requestQueue.clear();
-        System.out.println("Svi zahtjevi diska su usluzeni.");
+        result.append("Svi zahtjevi diska su usluzeni.");
+        return result.toString();
     }
+
 }

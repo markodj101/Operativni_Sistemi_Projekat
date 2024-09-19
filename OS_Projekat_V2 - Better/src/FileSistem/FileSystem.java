@@ -84,54 +84,80 @@ public class FileSystem {
         freeBlocks.addAll(blockIndices);
     }
 
-    public void changeDirectory(String name) {
+    public String changeDirectory(String name) {
         if (name.equals("/")) {
             currentDir = root;
+            return "Promenjen direktorijum na root.";
         } else if (name.equals("..")) {
             if (currentDir.getParent() != null) {
                 currentDir = currentDir.getParent();
+                return "Vraćeno na prethodni direktorijum.";
+            } else {
+                return "Nema prethodnog direktorijuma.";
             }
         } else {
             Directory newDir = currentDir.findSubDirectory(name);
             if (newDir != null) {
                 currentDir = newDir;
+                return "Promenjen direktorijum na: " + getCurrentDirPath();
             } else {
-                System.out.println("Direktorijum ne postoji.");
+                return "Direktorijum ne postoji.";
             }
         }
-        System.out.println("Promjenjen direktorijum na " + getCurrentDirPath());
     }
 
-    public void handleBackCommand() {
+    public String handleBackCommand() {
+        StringBuilder output = new StringBuilder();
+
         if (currentDir.getParent() != null) {
             currentDir = currentDir.getParent();
-            System.out.println("Promjenjen direktorijum na " + getCurrentDirPath());
+            output.append("Promenjen direktorijum na ").append(getCurrentDirPath()).append("\n");
         } else {
-            System.out.println("Vec ste u korjenom direktorijumu");
+            output.append("Već ste u korenskom direktorijumu\n");
         }
+
+        return output.toString();
     }
 
-    public void listCurrentDirectory() {
-        System.out.println("Lista direktorijuma: " + getCurrentDirPath());
+
+    public String listCurrentDirectory() {
+        StringBuilder result = new StringBuilder();
+        result.append("Lista direktorijuma: ").append(getCurrentDirPath()).append("\n");
+
         for (Directory dir : currentDir.getSubDirectories()) {
-            System.out.println("[DIR] " + dir.getName());
+            result.append("[DIR] ").append(dir.getName()).append("\n");
         }
         for (File file : currentDir.getFiles()) {
-            System.out.println(file.getName());
+            result.append(file.getName()).append("\n");
         }
+
+        return result.toString();
     }
 
-    public void createDirectory(String name) {
+    public String createDirectory(String name) {
+        // Kreirajte novi direktorijum
         Directory newDir = new Directory(Paths.get(currentDir.getAbsolutePath(), name).toString(), currentDir);
         currentDir.addSubDirectory(newDir);
+
+        // Kreirajte direktorijum na disku
         java.io.File dir = new java.io.File(newDir.getAbsolutePath());
+        StringBuilder output = new StringBuilder();
         if (!dir.exists()) {
-            dir.mkdir();
+            boolean created = dir.mkdir();
+            if (created) {
+                output.append("Kreiran direktorijum: ").append(name);
+            } else {
+                output.append("Ne može se kreirati direktorijum: ").append(name);
+            }
+        } else {
+            output.append("Direktorijum već postoji: ").append(name);
         }
-        System.out.println("Kreiran direktorijum: " + name);
+
+        return output.toString();
     }
 
-    public void delete(String name) {
+
+    public String delete(String name) {
         Directory dirToDelete = currentDir.findSubDirectory(name);
         if (dirToDelete != null) {
             currentDir.getSubDirectories().remove(dirToDelete);
@@ -140,11 +166,10 @@ public class FileSystem {
                 try {
                     Files.delete(Paths.get(dir.getAbsolutePath()));
                 } catch (IOException e) {
-                    System.out.println("Neuspjesno brisanje: " + name);
+                    return "Neuspjesno brisanje: " + name;
                 }
             }
-            System.out.println("Obrisan direktorijum: " + name);
-            return;
+            return "Obrisan direktorijum: " + name;
         }
 
         File fileToDelete = currentDir.findFile(name);
@@ -156,33 +181,35 @@ public class FileSystem {
                     Files.delete(Paths.get(file.getAbsolutePath()));
                     freeBlocks(fileToDelete.getBlockIndices());
                 } catch (IOException e) {
-                    System.out.println("Neuspjesno brisanje: " + name);
+                    return "Neuspjesno brisanje: " + name;
                 }
             }
-            System.out.println("Obrisan fajl: " + name);
-            return;
+            return "Obrisan fajl: " + name;
         }
 
-        System.out.println("Fajl/Direktorijum sa takvim nazivom ne postoji.");
+        return "Fajl/Direktorijum sa takvim nazivom ne postoji.";
     }
+
 
     public String getCurrentDirPath() {
         return currentDir.getAbsolutePath();
     }
 
-    public void showFreeBlocks() {
-        System.out.println("Slobodni blokovi: " + freeBlocks);
+    public String showFreeBlocks() {
+        return "Slobodni blokovi: " + freeBlocks;
     }
+
 
     public boolean hasSufficientFreeBlocks(int requiredBlocks) {
         return freeBlocks.size() >= requiredBlocks;
     }
-public void printDirectoryTree() {
-        printDirectoryTree(currentDir, "");
+    public String printDirectoryTree() {
+        return printDirectoryTree(currentDir, "");
     }
 
-    private void printDirectoryTree(Directory directory, String indent) {
-        System.out.println(indent + directory.getName());
+    private String printDirectoryTree(Directory directory, String indent) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(indent).append(directory.getName()).append("\n");
 
         List<Directory> subDirs = directory.getSubDirectories();
         List<File> files = directory.getFiles();
@@ -190,19 +217,22 @@ public void printDirectoryTree() {
         for (int i = 0; i < subDirs.size(); i++) {
             Directory subDir = subDirs.get(i);
             if (i == subDirs.size() - 1 && files.isEmpty()) {
-                printDirectoryTree(subDir, indent + "   ");
+                sb.append(printDirectoryTree(subDir, indent + "   "));
             } else {
-                printDirectoryTree(subDir, indent + "│   ");
+                sb.append(printDirectoryTree(subDir, indent + "│   "));
             }
         }
 
         for (int i = 0; i < files.size(); i++) {
             File file = files.get(i);
             if (i == files.size() - 1) {
-                System.out.println(indent + "└── " + file.getName());
+                sb.append(indent).append("└── ").append(file.getName()).append("\n");
             } else {
-                System.out.println(indent + "├── " + file.getName());
+                sb.append(indent).append("├── ").append(file.getName()).append("\n");
             }
         }
+
+        return sb.toString();
     }
+
 }
