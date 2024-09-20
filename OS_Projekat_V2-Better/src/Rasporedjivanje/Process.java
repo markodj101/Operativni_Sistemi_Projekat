@@ -14,7 +14,7 @@ public class Process extends Thread {
     private List<Integer> blockIndices; // Lista indeksa blokova koji čine proces
     public static final int BLOCK_SIZE = 4; // 4 bajta
     private boolean blocked;
-    private TextArea outputArea;  // TextArea for logging
+    private TextArea outputArea;
 
     public Process(String name, String content, Assembler assembler, ProcessScheduler processScheduler, TextArea outputArea) {
         this.name = name;
@@ -23,7 +23,7 @@ public class Process extends Thread {
         this.processScheduler = processScheduler;
         this.blockIndices = new ArrayList<>();
         this.blocked = false; // Inicijalno proces nije blokiran
-        this.outputArea = outputArea; // Initialize the output area
+        this.outputArea = outputArea;
     }
 
     public String getProcessName() {
@@ -74,12 +74,12 @@ public class Process extends Thread {
         }
     }
 
-    // Helper method to log output to the TextArea instead of the console
+
     private void logToUI(String message) {
         outputArea.appendText(message + "\n");
     }
 
-    // Overload logToUI for int values
+
     private void logToUI(int message) {
         outputArea.appendText(String.valueOf(message) + "\n");
     }

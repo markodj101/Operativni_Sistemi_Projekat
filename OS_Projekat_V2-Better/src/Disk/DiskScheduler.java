@@ -48,13 +48,11 @@ public class DiskScheduler {
             }
         }
 
-        // Process requests to the right of the current position
         for (int request : right) {
             result.append("Usluzivanje zahtjeva na poziciji ").append(request).append("\n");
             currentPosition = request;
         }
 
-        // Wrap around to the beginning of the disk
         if (!left.isEmpty()) {
             result.append("Prelazak na drugi kraj diska...\n");
             currentPosition = 0;

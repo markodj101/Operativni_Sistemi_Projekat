@@ -29,7 +29,7 @@ public class Assembler {
         }
         String fileName = commandParts[1];
 
-        // Provera ekstenzije
+        // Provjera ekstenzije
         if (!fileName.endsWith(".asm")) {
             return "Fajl " + fileName + " nema .asm ekstenziju i ne može biti pokrenut.";
         }
@@ -110,7 +110,6 @@ public class Assembler {
                     outputToGui("Nepoznata instrukcija: " + parts[0] + "\n");
                     break;
             }
-            // Simulate the execution delay for each instruction
             Thread.sleep(500);
         }
 

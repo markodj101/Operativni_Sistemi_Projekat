@@ -8,10 +8,10 @@ public class SystemUI extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        // Load the FXML file
+
         Parent root = FXMLLoader.load(getClass().getResource("/SystemUI.fxml"));
 
-        Scene scene = new Scene(root, 600, 400);
+        Scene scene = new Scene(root, 600, 300);
         scene.getStylesheets().add(getClass().getResource("/styles.css").toExternalForm()); // Load CSS
 
         primaryStage.setTitle("System Terminal");

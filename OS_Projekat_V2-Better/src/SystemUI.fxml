@@ -1,21 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Font?>
 
-<BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="SystemUIController">
+<BorderPane prefHeight="361.0" prefWidth="391.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/21" fx:controller="SystemUIController">
     <center>
         <VBox spacing="10" style="-fx-background-color: black; -fx-padding: 10;">
-            <TextArea fx:id="outputArea" editable="false" wrapText="true"
-                      style="-fx-control-inner-background: black; -fx-text-fill: white; -fx-font-family: 'Courier New'; -fx-font-size: 14;">
+            <TextArea fx:id="outputArea" editable="false" prefHeight="293.0" prefWidth="371.0" style="-fx-control-inner-background: black; -fx-text-fill: white; -fx-font-family: 'Courier New'; -fx-font-size: 14;" wrapText="true">
             </TextArea>
             <TextField fx:id="inputField" style="-fx-control-inner-background: black; -fx-text-fill: white; -fx-font-family: 'Courier New'; -fx-font-size: 14;">
             </TextField>
-            <Button text="Execute" onAction="#onExecute" style="-fx-background-color: green; -fx-text-fill: black;"/>
+
         </VBox>
     </center>
 </BorderPane>

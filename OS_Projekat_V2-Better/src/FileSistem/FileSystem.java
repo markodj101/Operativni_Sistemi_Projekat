@@ -13,10 +13,10 @@ public class FileSystem {
     private Directory root;
     private Directory currentDir;
     private List<Integer> freeBlocks; // Lista slobodnih blokova
-    private TextArea outputArea; // TextArea for logging
+    private TextArea outputArea;
 
     public FileSystem(TextArea outputArea) {
-        this.outputArea = outputArea; // Store the TextArea reference
+        this.outputArea = outputArea;
         this.root = new Directory(System.getProperty("user.dir"), null);
         this.currentDir = root;
         this.freeBlocks = new ArrayList<>();
@@ -139,11 +139,11 @@ public class FileSystem {
     }
 
     public String createDirectory(String name) {
-        // Kreirajte novi direktorijum
+        // Kreiranje novog direktorijuma
         Directory newDir = new Directory(Paths.get(currentDir.getAbsolutePath(), name).toString(), currentDir);
         currentDir.addSubDirectory(newDir);
 
-        // Kreirajte direktorijum na disku
+        // Kreirajnje direktorijum na disku
         java.io.File dir = new java.io.File(newDir.getAbsolutePath());
         StringBuilder output = new StringBuilder();
         if (!dir.exists()) {

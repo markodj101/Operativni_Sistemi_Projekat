@@ -224,7 +224,7 @@ public class ProcessScheduler {
         }
     }
 
-    // Helper method to log output to the TextArea instead of the console
+
     private void logToUI(String message) {
         outputArea.appendText(message + "\n");
     }

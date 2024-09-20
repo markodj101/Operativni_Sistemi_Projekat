@@ -12,9 +12,9 @@ import javafx.scene.input.KeyCode;
 public class SystemUIController {
     private CommandExecutor commandExecutor;
     @FXML
-    private TextArea outputArea;  // Linked with FXML's outputArea
+    private TextArea outputArea;
     @FXML
-    private TextField inputField; // Linked with FXML's inputField
+    private TextField inputField;
 
     @FXML
     public void initialize() {
@@ -27,7 +27,6 @@ public class SystemUIController {
         assembler.setProcessScheduler(processScheduler, fileSystem);
         this.commandExecutor = new CommandExecutor(fileSystem, processScheduler, memoryManager, diskScheduler, assembler);
 
-        // Add key listener for Enter key
         inputField.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.ENTER) {
                 onExecute();
